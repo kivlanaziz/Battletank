@@ -15,6 +15,6 @@
   },
   "scripts": {
     "dev": "nodemon server.js",
-    "auto-reload": "browser-sync start --proxy=localhost:8080 --files='**/*.css, **/*.pug, **/*.js, **/*.html' --ignore=node_modules --reload-delay 10 --no-ui --no-notify"
+    "auto-reload": "browser-sync start --proxy=localhost:8080 --files='**/*.css, **/*.js, **/*.html' --ignore=node_modules --no-ui --no-notify --no-open"
   }
 }

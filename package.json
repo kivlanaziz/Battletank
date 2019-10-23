@@ -1,0 +1,16 @@
+{
+  "name": "BattleTank",
+  "version": "1.0.0",
+  "description": "BattleCity Clone",
+  "main": "index.js",
+  "repository": "git@github.com:kivlanaziz/Battletank.git",
+  "author": "Naufal <nmuntaaza.wh@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.7",
+    "nodemon": "^1.19.4"
+  }
+}

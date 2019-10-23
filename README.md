@@ -1,2 +1,2 @@
-# Battletank
-Battletank game using SFML Library
+# BattleTank
+BattleCity clone game, build using pixi.js or Phaser.

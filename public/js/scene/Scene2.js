@@ -8,79 +8,38 @@ class Scene2 extends Phaser.Scene {
     this.background = this.add.tileSprite(0, 0, config.width, config.height, 'background');
     this.background.setOrigin(0, 0);
 
-    this.add.text(20, 20, 'Playing game', {
-      font: '25px Arial',
-      fill: 'yellow'
-    });
+    // this.add.text(20, 20, 'Playing game', {
+    //   font: '25px Arial',
+    //   fill: 'yellow'
+    // });
 
     // this.ship1 = this.add.image(config.width/2 - 50, config.height/2, 'ship1');
     // this.ship2 = this.add.image(config.width/2, config.height/2, 'ship2');
     // this.ship3 = this.add.image(config.width/2 + 50, config.height/2, 'ship3');
-    this.ship1 = this.add.sprite(config.width/2 - 50, config.height/2, 'ship1');
-    this.ship2 = this.add.sprite(config.width/2, config.height/2, 'ship2');
-    this.ship3 = this.add.sprite(config.width/2 + 50, config.height/2, 'ship3');
+    this.enemySmall = this.add.sprite(config.width / 2 - 50, config.height / 2, 'enemy_small');
+    this.enemyMedium = this.add.sprite(config.width / 2, config.height / 2, 'enemy_medium');
+    this.enemyBig = this.add.sprite(config.width / 2 + 50, config.height / 2, 'enemy_big');
 
-    this.anims.create({
-      key: 'ship1_anim',
-      frames: this.anims.generateFrameNumbers('ship1'),
-      frameRate: 20,
-      repeat: -1
-    });
+    // Player with physics
+    this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, 'power_up');
+    this.player.play('red_power');
+    this.player.setCollideWorldBounds(true);
 
-    this.anims.create({
-      key: 'ship2_anim',
-      frames: this.anims.generateFrameNumbers('ship2'),
-      frameRate: 20,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'ship3_anim',
-      frames: this.anims.generateFrameNumbers('ship3'),
-      frameRate: 20,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'explode',
-      frames: this.anims.generateFrameNumbers('explosion'),
-      frameRate: 20,
-      repeat: 0,
-      hideOnComplete: true
-    });
-
-    this.anims.create({
-      key: 'red',
-      frames: this.anims.generateFrameNumbers('power-up', {
-        start: 0,
-        end: 1
-      }),
-      frameRate: 20,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'gray',
-      frames: this.anims.generateFrameNumbers('power-up', {
-        start: 2,
-        end: 3
-      }),
-      frameRate: 20,
-      repeat: -1
-    });
+    // Keyboard event listener
+    this.cursorKeys = this.input.keyboard.createCursorKeys();
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     this.powerUps = this.physics.add.group();
 
-    var maxObject = 4;
-    for (let i = 0; i <= maxObject; i++) {
-      let powerUp = this.physics.add.sprite(16, 16, 'power-up');
+    for (let i = 0; i < 2; i++) {
+      let powerUp = this.physics.add.sprite(16, 16, 'power_up');
       this.powerUps.add(powerUp);
       powerUp.setRandomPosition(0, 0, game.config.width, game.config.height);
 
       if (Math.random() > 0.5) {
-        powerUp.play('red');
+        powerUp.play('red_power');
       } else {
-        powerUp.play('gray');
+        powerUp.play('gray_power');
       }
 
       powerUp.setVelocity(100, 100);
@@ -88,30 +47,59 @@ class Scene2 extends Phaser.Scene {
       powerUp.setBounce(1);
     }
 
-    this.ship1.play('ship1_anim');
-    this.ship2.play('ship2_anim');
-    this.ship3.play('ship3_anim');
+    this.enemySmall.play('enemy_small_anim');
+    this.enemyMedium.play('enemy_medium_anim');
+    this.enemyBig.play('enemy_big_anim');
 
-    this.ship1.setInteractive();
-    this.ship2.setInteractive();
-    this.ship3.setInteractive();
+    this.enemySmall.setInteractive();
+    this.enemyMedium.setInteractive();
+    this.enemyBig.setInteractive();
 
     this.input.on('gameobjectdown', this.destroyShip, this);
   }
 
   update() {
-    this.moveShip(this.ship1, 1);
-    this.moveShip(this.ship2, 2);
-    this.moveShip(this.ship3, 3);
+    this.moveShip(this.enemySmall, 1);
+    this.moveShip(this.enemyMedium, 2);
+    this.moveShip(this.enemyBig, 3);
 
     this.background.tilePositionY -= 0.5;
+
+    this.movePlayerManager();
+
+    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {  
+      console.log(this);
+      this.shootBeam();
+    }
+  }
+
+  shootBeam() {
+    var beam = new Beam(this);
+  }
+
+  movePlayerManager() {
+    if (this.cursorKeys.left.isDown) {
+      this.player.setVelocityX(-gameSettings.playerSpeed);
+    } else if (this.cursorKeys.right.isDown) {
+      this.player.setVelocityX(gameSettings.playerSpeed);
+    } else {
+      this.player.setVelocityX(0);
+    }
+
+    if (this.cursorKeys.up.isDown) {
+      this.player.setVelocityY(-gameSettings.playerSpeed);
+    } else if (this.cursorKeys.down.isDown) {
+      this.player.setVelocityY(gameSettings.playerSpeed);
+    } else {
+      this.player.setVelocityY(0);
+    }
   }
 
   moveShip(ship, speed) {
     if (ship.y > config.height) {
       this.resetShipPos(ship);
     }
-    ship.y += speed;
+    ship.y += speed;  
   }
 
   resetShipPos(ship) {
